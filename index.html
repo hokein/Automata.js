@@ -34,15 +34,27 @@
     document.getElementById("compile-dot").addEventListener("click", function (e) {
       var input = document.getElementById("repl_source").value;
         parser.reset(input);
-        var nfa = parser.parseToNFA();
-        document.getElementById("repl_results").innerHTML = nfa.toDotScript();
+        try { 
+          var nfa = parser.parseToNFA();
+          document.getElementById("repl_results").className="";
+          document.getElementById("repl_results").innerHTML = nfa.toDotScript();
+        } catch(e) {
+          document.getElementById("repl_results").className="error";
+          document.getElementById("repl_results").innerHTML = e;
+        }
     });
     document.getElementById("compile-nfa").addEventListener("click", function (e) {
-        var input = document.getElementById("repl_source").value;
-        parser.reset(input);
+      var input = document.getElementById("repl_source").value;
+      parser.reset(input);
+      try { 
         var nfa = parser.parseToNFA();
         var result = Viz(nfa.toDotScript(), 'svg', 'dot');
-        document.getElementById("repl_results").innerHTML = result;
+        document.getElementById("repl_results").className = "";
+        document.getElementById("repl_results").innerHTML = result; 
+      } catch(e) {
+        document.getElementById("repl_results").className = "error";
+        document.getElementById("repl_results").innerHTML = e;
+      }
     });
 </script>
 

@@ -154,12 +154,7 @@ RegParser.prototype.reset = function(regString) {
 }
 
 RegParser.prototype.parseToNFA = function() {
-  try {
-    this.nfa = this._expression();
-  } catch (e) {
-    console.log(e);
-    return new FSM();
-  }
+  this.nfa = this._expression();
   this._reorderNFAStateId();
   return this._traversalFSM();
 }
@@ -209,32 +204,6 @@ RegParser.prototype._reorderNFAStateId = function() {
     }
   }
 }
-
-//RegParser.prototype.traversalAllEdges = function(state, vis) {
-  //vis[state.id] = 1;
-  //var result = "";
-  //for (var i = 0; i < state.nextStates.length; ++i) {
-    //var token = state.nextStates[i][0];
-    //var nextState = state.nextStates[i][1]; 
-    //if (token.type != TOKEN_TYPE.EMPTY) {
-      //result += '  ' + state.id + '->' + nextState.id + ' [label="' + token.text  + '"];\n';
-    //} else {
-      //result += '  ' + state.id + '->' + nextState.id + ' [label="ε"];\n';
-    //}
-    //if (!(nextState.id in vis)) {
-      //result += this.traversalAllEdges(nextState, vis);
-    //}
-  //}
-  //return result;
-//}
-
-//RegParser.prototype.toDotScript = function() {
-  //var vis = {};
-  //var output = "";
-  //output = this.traversalAllEdges(this.nfa.startState, vis, output);
-  //return DOTSCRIPTBEGIN + "  node [shape = doublecircle];" + this.nfa.endState.id + ";\n"
-      //+ DOTSCRIPTNODESETTING + output + DOTSCRIPTEND;
-//}
 
 RegParser.prototype._expression = function() {
   var factorNFA = this._factor();
