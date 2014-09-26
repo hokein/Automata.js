@@ -5,6 +5,8 @@ Reg2Automata.js is a regular expression converter written in JS for both Node.js
 It aims to convert regular expression to finite state machine(FSM, like NFA).
 Besides, dot script transition is provided so that you can make diagrams with [Graphiz][1].
 
+[Try it online](http://hokein.github.io/Reg2Automata.js/)!
+
 ## API Desciption
 
 Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?`, `()`.
