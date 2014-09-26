@@ -153,12 +153,7 @@ RegParser.prototype.reset = function(regString) {
 }
 
 RegParser.prototype.parseToNFA = function() {
-  try {
-    this.nfa = this._expression();
-  } catch (e) {
-    console.log(e);
-    return new FSM();
-  }
+  this.nfa = this._expression();
   this._reorderNFAStateId();
   return this._traversalFSM();
 }
