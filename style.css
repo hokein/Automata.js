@@ -1,0 +1,96 @@
+// Borrow from http://coffeescript.org/documentation/css/docs.css 
+
+body {
+  font-size: 14px;
+  line-height: 21px;
+  color: #333;
+  font-family: "Helvetica Neue", "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif !important;
+}
+
+a {
+  color: #191933;
+}
+
+br.clear {
+  height: 0;
+  clear: both;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+code, pre, textarea {
+  font-family: Monaco, Consolas, "Lucida Console", monospace;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+pre {
+  border-left: 5px solid rgba(0,0,0,0.2);
+  padding: 3px 0 3px 12px;
+  font-size: 12px;
+}
+
+div.code {
+  position: relative;
+  background: #fff;
+  border: 1px solid #d8d8d8;
+  -webkit-box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+  -moz-box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+  box-shadow: 0px 0px 4px rgba(0,0,0,0.23);
+  zoom: 1;
+}
+div.code .minibutton {
+  text-transform: none;
+  position: absolute;
+  right: 8px; bottom: 8px;
+}
+
+div.code .load {
+  left: 8px; right: auto;
+}
+
+div.code pre, div.code textarea {
+  float: left;
+  width: 450px;
+  background: #fff;
+  border-left: 1px dotted #d0d0d0;
+  margin: 10px 0 15px 3px;
+  padding: 0 0 0 12px;
+}
+
+#repl_source, #repl_results {
+  background: transparent;
+  outline: none;
+  margin: 5px 0 20px;
+}
+
+#repl_results, #repl_source_wrap {
+  width: auto; height: auto;
+  position: absolute;
+  margin-bottom: 0;
+  top: 10px; left: 10px; right: 10px; bottom: 15px;
+}
+
+#repl_results.error {
+  color: red
+}
+
+#repl_source {
+  padding-left: 5px;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  overflow-y: auto;
+  resize: none;
+}
+
+#repl_results {
+  text-transform: none;
+  overflow-y: auto;
+  left: 50%;
+  border-left-color: #555;
+}

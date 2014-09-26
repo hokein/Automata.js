@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reg2Automata.js</title>
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+
+<body>
+<div class="collapse navbar-collapse navbar-ex1-collapse">
+    <ul class="nav navbar-nav">
+        <li><a href="#" ><span>Reg2Automata.js</span></a>
+        </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li><a id="compile-dot" href="#">Compile to DotScript</a></li>
+        <li><a id="compile-nfa" href="#">Compile to NFA</a></li>
+        <li><a href="https://github.com/hokein/reg2automata.js" target="_blank">About Reg2Automata</a></li>
+    </ul>
+</div>
+
+<div class="code">
+    <textarea id="repl_source" rows="100" spellcheck="false"></textarea>
+    <pre id="repl_results"></pre>
+    <br class="clear">
+</div>
+
+<script src="regparser-browser.js"></script>
+<script src="viz.js"></script>
+<script>
+    var regParser = require('regparser');
+    var parser = new regParser.RegParser();
+    document.getElementById("compile-dot").addEventListener("click", function (e) {
+      var input = document.getElementById("repl_source").value;
+        parser.reset(input);
+        var nfa = parser.parseToNFA();
+        document.getElementById("repl_results").innerHTML = nfa.toDotScript();
+    });
+    document.getElementById("compile-nfa").addEventListener("click", function (e) {
+        var input = document.getElementById("repl_source").value;
+        parser.reset(input);
+        var nfa = parser.parseToNFA();
+        var result = Viz(nfa.toDotScript(), 'svg', 'dot');
+        document.getElementById("repl_results").innerHTML = result;
+    });
+</script>
+
+</body>
+</html>
