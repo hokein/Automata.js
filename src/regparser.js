@@ -105,7 +105,7 @@ function NFA(startState, endState) {
 //   {
 //      state: [{name:"xx", initial: true},
 //              {name:"XX"}, ...,
-//              {name:"XX", end, true} ],
+//              {name:"XX", end: true} ],
 //      transition: [{from: "", to: "", label:""}]
 //   }
 function FSM() {
@@ -121,7 +121,7 @@ FSM.prototype.toDotScript = function() {
         this.transitions[i].label  + '"];\n';
   }
   var endStateId;
-  for (var i = 0; i < this.states[i].length; ++i) {
+  for (var i = 0; i < this.states.length; ++i) {
     if (this.states[i].end) {
       endStateId = this.states[i].name;
     }
