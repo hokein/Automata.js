@@ -7,7 +7,7 @@ Besides, dot script transition is provided so that you can make diagrams with [G
 
 [Try it online](http://hokein.github.io/Reg2Automata.js/)!
 
-## API Desciption
+## API Description
 
 Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?`, `()`.
 
@@ -21,7 +21,7 @@ Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?
      {name:"0", initial: true},
      {name:"1"},
      {name:"2", end, true} ],
-   Ntransitions: [
+   transitions: [
      {from: "0", to: "1", label:"a"},
      {from: "1", to: "2", label:"b"}
    ]
