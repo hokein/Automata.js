@@ -1,8 +1,10 @@
 var DOTSCRIPTBEGIN = 'digraph finite_state_machine {\n' + 
                      '  rankdir = LR;\n';
+
 var DOTSCRIPTNODESETTING = '  node [shape = plaintext];\n' +
                            '  "" ->0 [label =\"start\"];\n' +
                            '  node [shape = circle];\n';
+
 var DOTSCRIPTEND = '}\n';
 
 var TOKEN_TYPE = {
@@ -13,7 +15,7 @@ var TOKEN_TYPE = {
   OR: '|',
   ALTER: '?',
   END: 'EOF',
-  EMPTY: 'empty',
+  EMPTY: 'ε',
   UNKNOWN: 'unknown',
   LETTER: 'a-z0-9',
 };
@@ -22,6 +24,28 @@ function isLetterOrDigit(regChar) {
   return (regChar >= 'a' && regChar <= 'z') ||
          (regChar >= 'A' && regChar <= 'Z') ||
          (regChar >= '0' && regChar <= '9');
+}
+
+function constructGraph(startState) {
+  var nfaGraph = {};
+  var queue = [];
+  var vis = {};
+  queue.push(startState);
+  while (queue.length) {
+    var state = queue.shift();
+    nfaGraph[state.id] = [];
+    for (var i = 0; i < (state.nextStates).length; ++i) {
+      var nextId = state.nextStates[i][1].id;
+      var label = state.nextStates[i][0].text;
+      var nextState = state.nextStates[i][1];
+      nfaGraph[state.id].push([label, nextId]);
+      if (nextId in vis)
+        continue;
+      vis[nextId] = 1;
+      queue.push(state.nextStates[i][1]);
+    }
+  };
+  return nfaGraph;
 }
 
 // class Token
@@ -99,6 +123,135 @@ function NFA(startState, endState) {
   this.endState = endState;
 };
 
+NFA.prototype._emptyClosure = function(nfaStates, nfaGraph) {
+  var closure = [];
+  var stack = [];
+  for (var i = 0; i < nfaStates.length; ++i) {
+    stack.push(nfaStates[i]);
+    closure.push(nfaStates[i]);
+  }
+  while (stack.length) {
+    var stateId = stack.shift();
+    for (var i = 0; i < nfaGraph[stateId].length; ++i) {
+      var nextId = nfaGraph[stateId][i][1];
+      var label = nfaGraph[stateId][i][0];
+      if (label == TOKEN_TYPE.EMPTY &&
+          closure.indexOf(nextId) == -1) {
+        closure.push(nextId);
+        stack.push(nextId);
+      }
+    }
+  }
+  closure.sort(function(a, b) {
+    return a < b;
+  });
+  return closure;
+}
+
+NFA.prototype._move = function(dfaState, letter, id2States, nfaGraph) {
+  var stateArray = id2States[dfaState.id];
+  var result = [];
+  for (var i = 0; i < stateArray.length; ++i) {
+    var id = stateArray[i];
+    for (var k = 0; k < nfaGraph[id].length; ++k) {
+      var label = nfaGraph[id][k][0];
+      if (label == letter) {
+        result.push(nfaGraph[id][k][1]);
+      }
+    }
+  }
+  result.sort(function(a, b) {
+    return a < b;
+  });
+  return result;
+}
+
+NFA.prototype.toDFA = function() {
+  var nfaGraph = constructGraph(this.startState);
+  var alphabetTable = {};
+  for (var id in nfaGraph)
+    for (var j = 0; j < nfaGraph[id].length; ++j) {
+      var label = nfaGraph[id][j][0];
+      if (!alphabetTable.hasOwnProperty(label) &&
+          label != TOKEN_TYPE.EMPTY)
+        alphabetTable[label] = 1;
+    }
+
+  // {id:
+  //  nextStates: {
+  //    label:"",
+  //    nextStatesId: [id1, id2, id3],
+  //    vis: true,
+  //    accept: true
+  //  }
+  // }
+  var dStates = [];
+  var states2Id = {}; // [1, 2, 3] => id
+  var id2States = {}; // id => [1, 2, 3]
+  var id = 0;
+  var closure = this._emptyClosure([this.startState.id], nfaGraph);
+  states2Id[JSON.stringify(closure)] = id;
+  id2States[id] = closure;
+  dStates.push({id: id++, nextStates: {}, vis: false});
+
+  if (closure.indexOf(this.endState.id) != -1)
+    dStates[dStates.length-1].accept = true;
+
+  var unvisCnt = 1;
+  while (unvisCnt)  {
+    var unvisState;
+    unvisState = dStates.filter(function(state) {
+      return !state.vis;
+    })[0];
+    unvisState.vis = true;
+    --unvisCnt;
+    for (var letter in alphabetTable) {
+      if (letter == TOKEN_TYPE.EMPTY)
+        continue;
+
+      var nextStates = this._emptyClosure(
+          this._move(unvisState, letter, id2States, nfaGraph), nfaGraph);
+
+      if (!nextStates.length)
+        continue;
+      var nextStatesString = JSON.stringify(nextStates);
+      if (!states2Id.hasOwnProperty(nextStatesString)) {
+        var isAccept = nextStates.indexOf(this.endState.id) != -1;
+        states2Id[nextStatesString] = id;
+        id2States[id] = nextStates;
+        if (isAccept)
+          dStates.push({id: id++, nextStates: {}, vis: false, accept: true});
+        else
+          dStates.push({id: id++, nextStates: {}, vis: false});
+        ++unvisCnt;
+      }
+
+      unvisState.nextStates[letter] = nextStates;
+    }
+  }
+
+  var dfa = new FSM();
+  for (var i = 0; i < dStates.length; ++i) {
+    dfa.states.push({name:dStates[i].id});
+    if (dStates[i].initial)
+      dfa.states[dfa.states.length-1].initial = true;
+    if (dStates[i].accept)
+      dfa.states[dfa.states.length-1].accept = true;
+
+    for (var letter in alphabetTable) {
+      if (!dStates[i].nextStates[letter]) continue;
+      var arrayId = [];
+      for (var j = 0; j < dStates[i].nextStates[letter].length; ++j)
+        arrayId.push(dStates[i].nextStates[letter][j]);
+      if (arrayId.length)
+        dfa.transitions.push({from: dStates[i].id,
+                              to: states2Id[JSON.stringify(arrayId)],
+                              label:letter});
+    }
+  }
+  return dfa;
+}
+
 // class FSM, represent a finite state machine.
 // format:
 //   {
@@ -155,6 +308,11 @@ RegParser.prototype.parseToNFA = function() {
   this.nfa = this._expression();
   this._reorderNFAStateId();
   return this._traversalFSM();
+}
+
+RegParser.prototype.parseToDFA = function() {
+  var fsm = this.parseToNFA();
+  return this.nfa.toDFA();
 }
 
 RegParser.prototype._traversalFSM = function() {
