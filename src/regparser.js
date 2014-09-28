@@ -1,4 +1,5 @@
 var DOTSCRIPTBEGIN = 'digraph finite_state_machine {\n' + 
+                     '  node [shape = circle];0\n' +
                      '  rankdir = LR;\n';
 
 var DOTSCRIPTNODESETTING = '  node [shape = plaintext];\n' +
