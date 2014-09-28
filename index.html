@@ -16,6 +16,7 @@
     <ul class="nav navbar-nav navbar-right">
         <li><a id="compile-dot" href="#">Compile to DotScript</a></li>
         <li><a id="compile-nfa" href="#">Compile to NFA</a></li>
+        <li><a id="compile-dfa" href="#">Compile to DFA</a></li>
         <li><a href="https://github.com/hokein/reg2automata.js" target="_blank">About Reg2Automata</a></li>
     </ul>
 </div>
@@ -51,6 +52,19 @@
         var result = Viz(nfa.toDotScript(), 'svg', 'dot');
         document.getElementById("repl_results").className = "";
         document.getElementById("repl_results").innerHTML = result; 
+      } catch(e) {
+        document.getElementById("repl_results").className = "error";
+        document.getElementById("repl_results").innerHTML = e;
+      }
+    });
+    document.getElementById("compile-dfa").addEventListener("click", function (e) {
+      var input = document.getElementById("repl_source").value;
+      parser.reset(input);
+      try {
+        var nfa = parser.parseToDFA();
+        var result = Viz(nfa.toDotScript(), 'svg', 'dot');
+        document.getElementById("repl_results").className = "";
+        document.getElementById("repl_results").innerHTML = result;
       } catch(e) {
         document.getElementById("repl_results").className = "error";
         document.getElementById("repl_results").innerHTML = e;
