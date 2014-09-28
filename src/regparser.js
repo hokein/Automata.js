@@ -195,9 +195,10 @@ NFA.prototype.toDFA = function() {
   id2States[id] = closure;
   dStates.push({id: id++, nextStates: {}, vis: false});
 
-  if (closure.indexOf(this.endState.id) != -1)
-    dStates[dStates.length-1].accept = true;
-
+  dStates[dStates.length-1].accept =
+      closure.indexOf(this.endState.id) != -1;
+  dStates[dStates.length-1].initial =
+      closure.indexOf(this.startState.id) != -1;
   var unvisCnt = 1;
   while (unvisCnt)  {
     var unvisState;
@@ -217,13 +218,14 @@ NFA.prototype.toDFA = function() {
         continue;
       var nextStatesString = JSON.stringify(nextStates);
       if (!states2Id.hasOwnProperty(nextStatesString)) {
-        var isAccept = nextStates.indexOf(this.endState.id) != -1;
         states2Id[nextStatesString] = id;
         id2States[id] = nextStates;
-        if (isAccept)
-          dStates.push({id: id++, nextStates: {}, vis: false, accept: true});
-        else
-          dStates.push({id: id++, nextStates: {}, vis: false});
+        dStates.push({id: id++,
+                      nextStates: {},
+                      vis: false,
+                      accept: nextStates.indexOf(this.endState.id) != -1,
+                      initial: nextStates.indexOf(this.startState.id) != -1
+                     });
         ++unvisCnt;
       }
 
