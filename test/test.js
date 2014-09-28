@@ -63,7 +63,7 @@ describe('Parser', function() {
       var fsm = parser.parseToNFA();
       assert.equal(2, fsm.states.length);
       assert.equal(true, fsm.states[0].initial);
-      assert.equal(true, fsm.states[1].end);
+      assert.equal(true, fsm.states[1].accept);
       assert.equal(1, fsm.transitions.length);
       assert.equal(0, fsm.transitions[0].from);
       assert.equal(1, fsm.transitions[0].to);
@@ -76,7 +76,7 @@ describe('Parser', function() {
       var fsm = parser.parseToNFA();
       assert.equal(2, fsm.states.length);
       assert.equal(true, fsm.states[0].initial);
-      assert.equal(true, fsm.states[1].end);
+      assert.equal(true, fsm.states[1].accept);
       assert.equal(1, fsm.transitions.length);
       assert.equal(0, fsm.transitions[0].from);
       assert.equal(1, fsm.transitions[0].to);
@@ -92,7 +92,7 @@ describe('Parser', function() {
         return state.name == 0 && state.initial; 
       }));
       assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 2 && state.end; 
+        return state.name == 2 && state.accept;
       }));
       assert.notEqual([], fsm.states.filter(function(state) {
         return state.name == 1; 

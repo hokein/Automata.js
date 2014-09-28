@@ -84,9 +84,9 @@ Lexer.prototype._consume = function() {
 }
 
 // class NFAState
-function NFAState(id, isEnd) {
+function NFAState(id, isAccept) {
   this.id = id;
-  this.isEnd = isEnd;
+  this.isAccept = isAccept;
   this.nextStates = [];
 };
 
@@ -105,7 +105,7 @@ function NFA(startState, endState) {
 //   {
 //      state: [{name:"xx", initial: true},
 //              {name:"XX"}, ...,
-//              {name:"XX", end: true} ],
+//              {name:"XX", accept: true} ],
 //      transition: [{from: "", to: "", label:""}]
 //   }
 function FSM() {
@@ -122,7 +122,7 @@ FSM.prototype.toDotScript = function() {
   }
   var endStateId;
   for (var i = 0; i < this.states.length; ++i) {
-    if (this.states[i].end) {
+    if (this.states[i].accept) {
       endStateId = this.states[i].name;
     }
   }
@@ -175,8 +175,8 @@ RegParser.prototype._traversalFSM = function() {
       if (nextId in vis)
         continue;
       vis[nextId] = 1;
-      if (nextState.isEnd)
-        fsm.states.push({name: nextId, end: true});
+      if (nextState.isAccept)
+        fsm.states.push({name: nextId, accept: true});
       else
         fsm.states.push({name: nextId});
       queue.push(state.nextStates[i][1]);
@@ -209,7 +209,7 @@ RegParser.prototype._expression = function() {
   if (this.lookHead.type == TOKEN_TYPE.LETTER ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
     var subNFA = this._expression();
-    factorNFA.endState.isEnd = false;
+    factorNFA.endState.isAccept = false;
     factorNFA.endState.id = subNFA.startState.id;
     factorNFA.endState.nextStates = subNFA.startState.nextStates;
     subNFA.startState = null;
@@ -222,7 +222,7 @@ RegParser.prototype._factor = function() {
   var termNFA = this._term();
   if (this.lookHead.type == TOKEN_TYPE.PLUS) { // case +
     var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
-    termNFA.endState.isEnd = false;
+    termNFA.endState.isAccept = false;
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState); 
     termNFA.endState.addStates(EMPTYTOKEN, termNFA.startState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
@@ -231,7 +231,7 @@ RegParser.prototype._factor = function() {
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.STAR) { // case *
     var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
-    termNFA.endState.isEnd = false;
+    termNFA.endState.isAccept = false;
 
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState); 
@@ -245,8 +245,8 @@ RegParser.prototype._factor = function() {
      
     var factorNFA = this._factor();
     var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
-    termNFA.endState.isEnd = false;
-    factorNFA.endState.isEnd = false;
+    termNFA.endState.isAccept = false;
+    factorNFA.endState.isAccept = false;
 
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     nfa.startState.addStates(EMPTYTOKEN, factorNFA.startState);
@@ -256,7 +256,7 @@ RegParser.prototype._factor = function() {
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.ALTER) { // case ?
     var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
-    termNFA.endState.isEnd = false;
+    termNFA.endState.isAccept = false;
 
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState); 

@@ -20,7 +20,7 @@ Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?
    states: [
      {name:"0", initial: true},
      {name:"1"},
-     {name:"2", end, true} ],
+     {name:"2", accept, true} ],
    transitions: [
      {from: "0", to: "1", label:"a"},
      {from: "1", to: "2", label:"b"}
