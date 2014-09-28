@@ -1,12 +1,4 @@
-var DOTSCRIPTBEGIN = 'digraph finite_state_machine {\n' + 
-                     '  node [shape = circle];0\n' +
-                     '  rankdir = LR;\n';
-
-var DOTSCRIPTNODESETTING = '  node [shape = plaintext];\n' +
-                           '  "" ->0 [label =\"start\"];\n' +
-                           '  node [shape = circle];\n';
-
-var DOTSCRIPTEND = '}\n';
+var DotConverter = require('./dot-converter')
 
 var TOKEN_TYPE = {
   LBRACK: '(',
@@ -269,20 +261,7 @@ function FSM() {
 };
 
 FSM.prototype.toDotScript = function() {
-  var dotScript = "";
-  for (var i = 0; i < this.transitions.length; ++i) {
-    dotScript += '  ' + this.transitions[i].from + '->' + 
-        this.transitions[i].to + ' [label="' + 
-        this.transitions[i].label  + '"];\n';
-  }
-  var endStateId;
-  for (var i = 0; i < this.states.length; ++i) {
-    if (this.states[i].accept) {
-      endStateId = this.states[i].name;
-    }
-  }
-  return DOTSCRIPTBEGIN + "  node [shape = doublecircle];" + endStateId + ";\n"
-      + DOTSCRIPTNODESETTING + dotScript + DOTSCRIPTEND;
+  return DotConverter.toDotScript(this);
 };
 
 // class Parser
