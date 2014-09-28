@@ -13,7 +13,9 @@ Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?
 
 ###FSM
 
-`FSM` is a object represent a finite state machine, json definition is below:
+`FSM` is a object represent a finite state machine(NFA, DFA).
+
+The json definition is below:
 
 ```
 {
@@ -44,7 +46,13 @@ Set regular expression `string` in parser.
 ####RegParser.parseToNFA()
 
 Parses the given regular expression.
-Returns a `FSM` object, the `FSM` is a Nondeterministic Finite Automata(NFA).
+Returns a `FSM` object, the `FSM` represents a Nondeterministic Finite Automata(NFA).
+
+####RegParser.parseToDFA()
+
+Parses the given regular expression.
+
+Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA).
 
 ## Usage 
 
