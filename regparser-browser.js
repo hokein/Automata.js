@@ -1,13 +1,37 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"regparser":[function(require,module,exports){
-var DOTSCRIPTBEGIN = 'digraph finite_state_machine {\n' + 
-                     '  node [shape = circle];0\n' +
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var DOTSCRIPTHEADER = 'digraph finite_state_machine {\n' + 
                      '  rankdir = LR;\n';
-
-var DOTSCRIPTNODESETTING = '  node [shape = plaintext];\n' +
-                           '  "" ->0 [label =\"start\"];\n' +
-                           '  node [shape = circle];\n';
-
 var DOTSCRIPTEND = '}\n';
+
+exports.toDotScript = function(fsm) {
+  var transitionDotScript = '  node [shape = circle];\n';
+  for (var i = 0; i < fsm.transitions.length; ++i) {
+    transitionDotScript += '  ' + fsm.transitions[i].from + '->' + 
+        fsm.transitions[i].to + ' [label="' + 
+        fsm.transitions[i].label  + '"];\n';
+  }
+  var initialStatesDotScript = '';
+  var initialStatesStartDotScript = '  node [shape = plaintext];\n';
+  var acceptStatesDotScript = '';
+  for (var i = 0; i < fsm.states.length; ++i) {
+    if (fsm.states[i].accept)
+      acceptStatesDotScript += '  node [shape = doublecircle]; ' +
+          fsm.states[i].name + ';\n';
+    if (fsm.states[i].initial) {
+      initialStatesStartDotScript += '  "" -> ' +  fsm.states[i].name +
+          ' [label = "start"];\n';
+      // accept is higher priority than initial state.
+      if (!fsm.states[i].accept)
+        initialStatesDotScript += '  node [shape = circle]; ' +
+            fsm.states[i].name + ';\n';
+    }
+  }
+  return DOTSCRIPTHEADER + initialStatesDotScript + acceptStatesDotScript +
+      initialStatesStartDotScript + transitionDotScript + DOTSCRIPTEND;
+}
+
+},{}],"regparser":[function(require,module,exports){
+var DotConverter = require('./dot-converter')
 
 var TOKEN_TYPE = {
   LBRACK: '(',
@@ -196,9 +220,10 @@ NFA.prototype.toDFA = function() {
   id2States[id] = closure;
   dStates.push({id: id++, nextStates: {}, vis: false});
 
-  if (closure.indexOf(this.endState.id) != -1)
-    dStates[dStates.length-1].accept = true;
-
+  dStates[dStates.length-1].accept =
+      closure.indexOf(this.endState.id) != -1;
+  dStates[dStates.length-1].initial =
+      closure.indexOf(this.startState.id) != -1;
   var unvisCnt = 1;
   while (unvisCnt)  {
     var unvisState;
@@ -218,13 +243,14 @@ NFA.prototype.toDFA = function() {
         continue;
       var nextStatesString = JSON.stringify(nextStates);
       if (!states2Id.hasOwnProperty(nextStatesString)) {
-        var isAccept = nextStates.indexOf(this.endState.id) != -1;
         states2Id[nextStatesString] = id;
         id2States[id] = nextStates;
-        if (isAccept)
-          dStates.push({id: id++, nextStates: {}, vis: false, accept: true});
-        else
-          dStates.push({id: id++, nextStates: {}, vis: false});
+        dStates.push({id: id++,
+                      nextStates: {},
+                      vis: false,
+                      accept: nextStates.indexOf(this.endState.id) != -1,
+                      initial: nextStates.indexOf(this.startState.id) != -1
+                     });
         ++unvisCnt;
       }
 
@@ -268,20 +294,7 @@ function FSM() {
 };
 
 FSM.prototype.toDotScript = function() {
-  var dotScript = "";
-  for (var i = 0; i < this.transitions.length; ++i) {
-    dotScript += '  ' + this.transitions[i].from + '->' + 
-        this.transitions[i].to + ' [label="' + 
-        this.transitions[i].label  + '"];\n';
-  }
-  var endStateId;
-  for (var i = 0; i < this.states.length; ++i) {
-    if (this.states[i].accept) {
-      endStateId = this.states[i].name;
-    }
-  }
-  return DOTSCRIPTBEGIN + "  node [shape = doublecircle];" + endStateId + ";\n"
-      + DOTSCRIPTNODESETTING + dotScript + DOTSCRIPTEND;
+  return DotConverter.toDotScript(this);
 };
 
 // class Parser
@@ -460,4 +473,7 @@ module.exports.RegParser = RegParser;
 module.exports.Lexer = Lexer;
 module.exports.FSM = FSM;
 
-},{}]},{},[]);
+var parser = new RegParser('a*');
+console.log(parser.parseToDFA().toDotScript());
+
+},{"./dot-converter":1}]},{},[]);
