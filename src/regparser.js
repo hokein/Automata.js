@@ -57,7 +57,7 @@ function Lexer(regString) {
 
 Lexer.prototype.hasNext = function() {
   if (this.regString)
-    return this.index < this.regString.length;  
+    return this.index < this.regString.length;
   return false;
 }
 
@@ -86,13 +86,13 @@ Lexer.prototype.nextToken = function() {
         this._consume();
         return new Token(TOKEN_TYPE.OR, '|');
       default:
-        if (isLetterOrDigit(this.regString[this.index])) 
+        if (isLetterOrDigit(this.regString[this.index]))
            return new Token(TOKEN_TYPE.LETTER, this.regString[this.index++]);
         else
            throw new Error('Unknown type of ' + this.regString[this.index]);
     }
   }
-  return new Token(TOKEN_TYPE.END, 'EOF'); 
+  return new Token(TOKEN_TYPE.END, 'EOF');
 }
 
 Lexer.prototype._consume = function() {
@@ -241,7 +241,8 @@ NFA.prototype.toDFA = function() {
       if (arrayId.length) {
         if (!dfa.transitions[dStates[i].id])
           dfa.transitions[dStates[i].id] = {}
-        dfa.transitions[dStates[i].id][states2Id[JSON.stringify(arrayId)]] = letter;
+        dfa.transitions[dStates[i].id][states2Id[JSON.stringify(arrayId)]] =
+            letter;
       }
     }
   }
@@ -337,7 +338,7 @@ RegParser.prototype._reorderNFAStateId = function() {
   vis[this.nfa.startState.id] = 1;
   while (queue.length) {
     var state = queue.shift();
-    state.id = this.id++;  
+    state.id = this.id++;
     for (var i = 0; i < (state.nextStates).length; ++i) {
       var nextId = state.nextStates[i][1].id;
       if (nextId in vis)
@@ -365,30 +366,33 @@ RegParser.prototype._expression = function() {
 RegParser.prototype._factor = function() {
   var termNFA = this._term();
   if (this.lookHead.type == TOKEN_TYPE.PLUS) { // case +
-    var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
+    var nfa = new NFA(new NFAState(this.id++, false),
+                      new NFAState(this.id++, true));
     termNFA.endState.isAccept = false;
-    nfa.startState.addStates(EMPTYTOKEN, termNFA.startState); 
+    nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     termNFA.endState.addStates(EMPTYTOKEN, termNFA.startState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
     this._match(TOKEN_TYPE.PLUS);
 
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.STAR) { // case *
-    var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
+    var nfa = new NFA(new NFAState(this.id++, false),
+                      new NFAState(this.id++, true));
     termNFA.endState.isAccept = false;
 
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
-    nfa.startState.addStates(EMPTYTOKEN, nfa.endState); 
+    nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, termNFA.startState);
      
     this._match(TOKEN_TYPE.STAR);
-    return nfa; 
+    return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.OR) { // case |
     this._match(TOKEN_TYPE.OR);
      
     var factorNFA = this._factor();
-    var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
+    var nfa = new NFA(new NFAState(this.id++, false),
+                      new NFAState(this.id++, true));
     termNFA.endState.isAccept = false;
     factorNFA.endState.isAccept = false;
 
@@ -399,15 +403,16 @@ RegParser.prototype._factor = function() {
     
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.ALTER) { // case ?
-    var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
+    var nfa = new NFA(new NFAState(this.id++, false),
+                      new NFAState(this.id++, true));
     termNFA.endState.isAccept = false;
 
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
-    nfa.startState.addStates(EMPTYTOKEN, nfa.endState); 
+    nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
      
     this._match(TOKEN_TYPE.ALTER);
-    return nfa; 
+    return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.Unknown) {
     throw new Error("Unknown symbol: " + this.lookHead.text);
   }
@@ -416,7 +421,8 @@ RegParser.prototype._factor = function() {
 
 RegParser.prototype._term = function() {
   if (this.lookHead.type == TOKEN_TYPE.LETTER) {
-    var nfa = new NFA(new NFAState(this.id++, false), new NFAState(this.id++, true));
+    var nfa = new NFA(new NFAState(this.id++, false),
+                      new NFAState(this.id++, true));
     nfa.startState.addStates(this.lookHead, nfa.endState);
     this._match(TOKEN_TYPE.LETTER);
     return nfa;

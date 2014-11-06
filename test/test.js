@@ -12,7 +12,7 @@ var testcases = [
 
 describe('Lexer', function() {
   describe('#testcase: ' + testcases[0], function() {
-     it('', function() { 
+     it('', function() {
        var lexer = new regparser.Lexer(testcases[0]);
        assert.equal(true, lexer.hasNext());
        assert.equal('a', lexer.nextToken().text);

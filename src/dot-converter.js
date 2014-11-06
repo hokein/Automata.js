@@ -1,5 +1,4 @@
-var DOTSCRIPTHEADER = 'digraph finite_state_machine {\n' + 
-                     '  rankdir = LR;\n';
+var DOTSCRIPTHEADER = 'digraph finite_state_machine {\n' + '  rankdir = LR;\n';
 var DOTSCRIPTEND = '}\n';
 
 exports.toDotScript = function(fsm) {
