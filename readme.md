@@ -19,14 +19,13 @@ The json definition is below:
 
 ```
 {
-   states: [
-     {name:"0", initial: true},
-     {name:"1"},
-     {name:"2", accept, true} ],
-   transitions: [
-     {from: "0", to: "1", label:"a"},
-     {from: "1", to: "2", label:"b"}
-   ]
+  initialState: 'id',
+  acceptState: 'id',
+  numOfStates: Integer,
+  transitions: {
+    "id": { 'to_id': label, },
+    ...,
+  }
 }
 ```
 
@@ -46,6 +45,7 @@ Set regular expression `string` in parser.
 ####RegParser.parseToNFA()
 
 Parses the given regular expression.
+
 Returns a `FSM` object, the `FSM` represents a Nondeterministic Finite Automata(NFA).
 
 ####RegParser.parseToDFA()
