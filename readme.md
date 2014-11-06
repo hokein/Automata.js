@@ -22,8 +22,9 @@ The json definition is below:
   initialState: 'id',
   acceptState: 'id',
   numOfStates: Integer,
+  type: 'DFA' or 'NFA',
   transitions: {
-    "id": { 'to_id': label, },
+    'id': { 'to_id': label, },
     ...,
   }
 }

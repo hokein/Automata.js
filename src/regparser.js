@@ -226,6 +226,7 @@ NFA.prototype.toDFA = function() {
   }
 
   var dfa = new FSM();
+  dfa.type = 'DFA';
   dfa.numOfStates = id;
   for (var i = 0; i < dStates.length; ++i) {
     if (dStates[i].initial)
@@ -255,6 +256,7 @@ NFA.prototype.toDFA = function() {
 //     initialState: 'id',
 //     acceptState: 'id',
 //     numOfStates: Integer,
+//     type: 'DFA',
 //     transitions: {
 //       "id": { 'to_id': label, },
 //       ...,
@@ -309,6 +311,7 @@ RegParser.prototype._traversalFSM = function() {
 
   fsm.initialState = this.nfa.startState.id;
   fsm.numOfStates = this.id;
+  fsm.type = 'NFA';
   vis[this.nfa.startState.id] = 1;
   while (queue.length) {
     var state = queue.shift();
