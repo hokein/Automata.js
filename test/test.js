@@ -61,106 +61,105 @@ describe('Parser', function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[0]);
       var fsm = parser.parseToNFA();
-      assert.equal(2, fsm.states.length);
-      assert.equal(true, fsm.states[0].initial);
-      assert.equal(true, fsm.states[1].accept);
-      assert.equal(1, fsm.transitions.length);
-      assert.equal(0, fsm.transitions[0].from);
-      assert.equal(1, fsm.transitions[0].to);
-      assert.equal('a', fsm.transitions[0].label);
+      assert.equal(2, fsm.numOfStates);
+      assert.equal(0, fsm.initialState);
+      assert.equal(1, fsm.acceptState);
+      assert.equal('a', fsm.transitions['0']['1']);
     });
   });
   describe('#testcase: ' + testcases[1], function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[1]);
       var fsm = parser.parseToNFA();
-      assert.equal(2, fsm.states.length);
-      assert.equal(true, fsm.states[0].initial);
-      assert.equal(true, fsm.states[1].accept);
-      assert.equal(1, fsm.transitions.length);
-      assert.equal(0, fsm.transitions[0].from);
-      assert.equal(1, fsm.transitions[0].to);
-      assert.equal('a', fsm.transitions[0].label);
+      assert.equal(2, fsm.numOfStates);
+      assert.equal(0, fsm.initialState);
+      assert.equal(1, fsm.acceptState);
+      assert.equal('a', fsm.transitions['0']['1']);
     });
   });
   describe('#testcase: ' + testcases[2], function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[2]);
       var fsm = parser.parseToNFA();
-      assert.equal(3, fsm.states.length);
-      assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 0 && state.initial; 
-      }));
-      assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 2 && state.accept;
-      }));
-      assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 1; 
-      }));
-      assert.notEqual([], fsm.transitions.filter(function(transition) {
-        return transition.from == 0 && transition.to == 1 &&
-            transition.label == 'a'; 
-      }));
-      assert.notEqual([], fsm.transitions.filter(function(transition) {
-        return transition.from == 1 && transition.to == 2 &&
-            transition.label == 'b'; 
-      }));
+      assert.equal(3, fsm.numOfStates);
+      assert.equal(0, fsm.initialState);
+      assert.equal(2, fsm.acceptState);
+      assert.equal('a', fsm.transitions['0']['1']);
+      assert.equal('b', fsm.transitions['1']['2']);
     });
   });
   describe('#testcase: ' + testcases[3], function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[3]);
       var fsm = parser.parseToNFA();
-      assert.equal(4, fsm.states.length);
-      assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 0 && state.initial; 
-      }));
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'a'; 
-      }).length);
-      assert.equal(4, fsm.transitions.filter(function(transition) {
-        return transition.label == 'ε'; 
-      }).length);
+      assert.equal(4, fsm.numOfStates);
+      assert.equal(0, fsm.initialState);
+      var cnt_a = 0;
+      var cnt_empty = 0;
+      for (var from_id in fsm.transitions) {
+        for (var to_id in fsm.transitions[from_id]) {
+          if (fsm.transitions[from_id][to_id] == 'a')
+            ++cnt_a;
+          else if (fsm.transitions[from_id][to_id] == 'ε')
+            ++cnt_empty;
+        }
+      }
+      assert.equal(1, cnt_a);
+      assert.equal(4, cnt_empty);
     });
   });
   describe('#testcase: ' + testcases[4], function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[4]);
       var fsm = parser.parseToNFA();
-      assert.equal(4, fsm.states.length);
-      assert.notEqual([], fsm.states.filter(function(state) {
-        return state.name == 0 && state.initial; 
-      }));
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'a'; 
-      }).length);
-      assert.equal(3, fsm.transitions.filter(function(transition) {
-        return transition.label == 'ε'; 
-      }).length);
+      assert.equal(4, fsm.numOfStates);
+      assert.equal(0, fsm.initialState);
+      var cnt_a = 0;
+      var cnt_empty = 0;
+      for (var from_id in fsm.transitions) {
+        for (var to_id in fsm.transitions[from_id]) {
+          if (fsm.transitions[from_id][to_id] == 'a')
+            ++cnt_a;
+          else if (fsm.transitions[from_id][to_id] == 'ε')
+            ++cnt_empty;
+        }
+      }
+      assert.equal(1, cnt_a);
+      assert.equal(3, cnt_empty);
     });
   });
   describe('#testcase: ' + testcases[5], function() {
     it('', function() {
       var parser = new regparser.RegParser(testcases[5]);
       var fsm = parser.parseToNFA();
-      assert.equal(1, fsm.states.filter(function(state) {
-        return state.name == 0 && state.initial; 
-      }).length);
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'a'; 
-      }).length);
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'b'; 
-      }).length);
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'c'; 
-      }).length);
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'd'; 
-      }).length);
-      assert.equal(1, fsm.transitions.filter(function(transition) {
-        return transition.label == 'e'; 
-      }).length);
+      assert.equal(0, fsm.initialState);
+      var cnt_a = 0, cnt_b = 0, cnt_c = 0, cnt_d = 0, cnt_e = 0;
+      for (var from_id in fsm.transitions) {
+        for (var to_id in fsm.transitions[from_id]) {
+          switch(fsm.transitions[from_id][to_id]) {
+            case 'a':
+              ++cnt_a;
+              break;
+            case 'b':
+              ++cnt_b;
+              break;
+            case 'c':
+              ++cnt_c;
+              break;
+            case 'd':
+              ++cnt_d;
+              break;
+            case 'e':
+              ++cnt_e;
+              break;
+          }
+        }
+      }
+      assert.equal(1, cnt_a);
+      assert.equal(1, cnt_b);
+      assert.equal(1, cnt_c);
+      assert.equal(1, cnt_d);
+      assert.equal(1, cnt_e);
     });
   });
 });

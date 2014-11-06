@@ -226,22 +226,23 @@ NFA.prototype.toDFA = function() {
   }
 
   var dfa = new FSM();
+  dfa.numOfStates = id;
   for (var i = 0; i < dStates.length; ++i) {
-    dfa.states.push({name:dStates[i].id});
     if (dStates[i].initial)
-      dfa.states[dfa.states.length-1].initial = true;
+      dfa.initialState = dStates[i].id;
     if (dStates[i].accept)
-      dfa.states[dfa.states.length-1].accept = true;
+      dfa.acceptState = dStates[i].id;
 
     for (var letter in alphabetTable) {
       if (!dStates[i].nextStates[letter]) continue;
       var arrayId = [];
       for (var j = 0; j < dStates[i].nextStates[letter].length; ++j)
         arrayId.push(dStates[i].nextStates[letter][j]);
-      if (arrayId.length)
-        dfa.transitions.push({from: dStates[i].id,
-                              to: states2Id[JSON.stringify(arrayId)],
-                              label:letter});
+      if (arrayId.length) {
+        if (!dfa.transitions[dStates[i].id])
+          dfa.transitions[dStates[i].id] = {}
+        dfa.transitions[dStates[i].id][states2Id[JSON.stringify(arrayId)]] = letter;
+      }
     }
   }
   return dfa;
@@ -250,14 +251,16 @@ NFA.prototype.toDFA = function() {
 // class FSM, represent a finite state machine.
 // format:
 //   {
-//      state: [{name:"xx", initial: true},
-//              {name:"XX"}, ...,
-//              {name:"XX", accept: true} ],
-//      transition: [{from: "", to: "", label:""}]
+//     initialState: 'id',
+//     acceptState: 'id',
+//     numOfStates: Integer,
+//     transitions: {
+//       "id": { 'to_id': label, },
+//       ...,
+//     }
 //   }
 function FSM() {
-  this.states = [];
-  this.transitions = [];
+  this.transitions = {};
 };
 
 FSM.prototype.toDotScript = function() {
@@ -299,10 +302,12 @@ RegParser.prototype.parseToDFA = function() {
 
 RegParser.prototype._traversalFSM = function() {
   var fsm = new FSM();
-  var queue = []; 
+  var queue = [];
   var vis = {};
   queue.push(this.nfa.startState);
-  fsm.states.push({name: this.nfa.startState.id, initial: true});
+
+  fsm.initialState = this.nfa.startState.id;
+  fsm.numOfStates = this.id;
   vis[this.nfa.startState.id] = 1;
   while (queue.length) {
     var state = queue.shift();
@@ -310,14 +315,14 @@ RegParser.prototype._traversalFSM = function() {
       var nextId = state.nextStates[i][1].id;
       var label = state.nextStates[i][0].text;
       var nextState = state.nextStates[i][1];
-      fsm.transitions.push({from: state.id, to: nextId, label: label});
+      if (!fsm.transitions[state.id])
+        fsm.transitions[state.id] = {};
+      fsm.transitions[state.id][nextId] = label;
       if (nextId in vis)
         continue;
       vis[nextId] = 1;
       if (nextState.isAccept)
-        fsm.states.push({name: nextId, accept: true});
-      else
-        fsm.states.push({name: nextId});
+        fsm.acceptState = nextId;
       queue.push(state.nextStates[i][1]);
     }
   }
