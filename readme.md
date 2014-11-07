@@ -34,6 +34,11 @@ The json definition is below:
 
 Convert the fsm to Graphiz dot script.
 
+#### FSM.match(text)
+
+* `text`: String
+
+Determine whether `text` matches to the FSM. This methods only supports DFA.
 
 ###RegParser
 

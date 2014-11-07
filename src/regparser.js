@@ -271,6 +271,24 @@ FSM.prototype.toDotScript = function() {
   return DotConverter.toDotScript(this);
 };
 
+FSM.prototype.match = function(text) {
+  if (this.type == 'NFA')
+    throw new Error("match function doesn't support NFA.");
+  var currentState = this.initialState;
+  for (var i = 0; i < text.length; ++i) {
+    if (!this.transitions[currentState])
+      return false;
+    for (var nextState in this.transitions[currentState]) {
+      if (this.transitions[currentState][nextState] == text[i]) {
+        currentState = nextState;
+        break;
+      }
+      return false;
+    }
+  }
+  return this.acceptStates.indexOf(currentState) != -1;
+}
+
 // class Parser
 function RegParser(regString) {
   this.nfa = null;
