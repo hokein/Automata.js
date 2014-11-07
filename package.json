@@ -2,7 +2,7 @@
   "name": "reg2automata",
   "description": "A library convert regular expression to finite state matchine",
   "keywords": ["regular", "automata", "fsm"],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./index.js",
   "script": {
     "test": "make test"
