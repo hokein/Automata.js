@@ -13,12 +13,13 @@ exports.toDotScript = function(fsm) {
   var initialStatesStartDotScript = '  node [shape = plaintext];\n';
   var acceptStatesDotScript = '';
   for (var i = 0; i < fsm.numOfStates; ++i) {
-    if (fsm.acceptState == i)
+    if (fsm.acceptStates.indexOf(i.toString()) != -1) {
       acceptStatesDotScript += '  node [shape = doublecircle]; ' + i + ';\n';
-    if (fsm.initialState == i) {
+    }
+    if (fsm.initialState == i.toString()) {
       initialStatesStartDotScript += '  "" -> ' + i + ' [label = "start"];\n';
       // accept is higher priority than initial state.
-      if (fsm.acceptState != i)
+      if (fsm.acceptStates.indexOf(i.toString()) == -1)
         initialStatesDotScript += '  node [shape = circle]; ' + i + ';\n';
     }
   }
