@@ -20,7 +20,7 @@ The json definition is below:
 ```
 {
   initialState: 'id',
-  acceptState: 'id',
+  acceptState: ['id', ... ] ,
   numOfStates: Integer,
   type: 'DFA' or 'NFA',
   transitions: {
