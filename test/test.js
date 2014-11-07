@@ -1,5 +1,6 @@
-var regparser = require('../src/regparser')
-var assert = require("assert")
+var regparser = require('../src/regparser');
+var Lexer = require('../src/lexer').Lexer;
+var assert = require("assert");
 
 var testcases = [
   "a",
@@ -13,14 +14,14 @@ var testcases = [
 describe('Lexer', function() {
   describe('#testcase: ' + testcases[0], function() {
      it('', function() {
-       var lexer = new regparser.Lexer(testcases[0]);
+       var lexer = new Lexer(testcases[0]);
        assert.equal(true, lexer.hasNext());
        assert.equal('a', lexer.nextToken().text);
      })
   });
   describe('#testcase: ' + testcases[1], function() {
     it('', function() {
-      var lexer = new regparser.Lexer(testcases[1]);
+      var lexer = new Lexer(testcases[1]);
       assert.equal(true, lexer.hasNext());
       assert.equal('(', lexer.nextToken().text);
       assert.equal('a', lexer.nextToken().text);
@@ -29,7 +30,7 @@ describe('Lexer', function() {
   });
   describe('#testcase: ' + testcases[5], function() {
     it('', function() {
-      var lexer = new regparser.Lexer(testcases[5]);
+      var lexer = new Lexer(testcases[5]);
       assert.equal(true, lexer.hasNext());
       assert.equal('(', lexer.nextToken().text);
       assert.equal('a', lexer.nextToken().text);
