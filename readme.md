@@ -65,12 +65,12 @@ Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA
 ###Usage in Node.js
 
 ```
-var regParser = require('regparser');
+var regParser = require('reg2automata');
 
 var parser = new regParser.RegParser('a*b');
 var nfa = parser.parseToNFA();
 
-nfa.toDotScript();
+console.log(nfa.toDotScript());
 ```
 
 ###Usage in Browser
