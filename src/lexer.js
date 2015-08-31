@@ -10,7 +10,7 @@ var TOKEN_TYPE = {
   BLANK: ' ',
   ESCAPE: '\\',
   UNKNOWN: 'unknown',
-  REGCHAR: 'a-z0-9 \n\t',
+  REGCHAR: 'a-z0-9 \n\t\r',
 };
 
 function isRegChar(regChar) {
@@ -53,6 +53,12 @@ Lexer.prototype.nextToken = function() {
             case 't':
               ++this.index;
               return new Token(TOKEN_TYPE.REGCHAR, '\t');
+            case 'r':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\r');
+            case '\\':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\\');
           }
         }
         throw new Error('Expect character after "\\".');

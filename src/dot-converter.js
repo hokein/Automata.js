@@ -9,6 +9,10 @@ function escapeCharacter(token) {
       return '\\\\n';
     case '\t':
       return '\\\\t';
+    case '\r':
+      return '\\\\r';
+    case '\\':
+      return '[\\\\]';
   }
   return token;
 }
