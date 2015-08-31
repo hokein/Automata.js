@@ -323,7 +323,7 @@ RegParser.prototype._expression = function() {
 
 RegParser.prototype._expression_without_or = function() {
   var factorNFA = this._factor();
-  if (this.lookHead.type == TOKEN_TYPE.LETTER ||
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
     var subNFA = this._expression_without_or();
     factorNFA.endState.isAccept = false;
@@ -378,11 +378,11 @@ RegParser.prototype._factor = function() {
 }
 
 RegParser.prototype._term = function() {
-  if (this.lookHead.type == TOKEN_TYPE.LETTER) {
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR) {
     var nfa = new NFA(new NFAState(this.id++, false),
                       new NFAState(this.id++, true));
     nfa.startState.addStates(this.lookHead, nfa.endState);
-    this._match(TOKEN_TYPE.LETTER);
+    this._match(TOKEN_TYPE.REGCHAR);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.LBRACK) {
     this._match(TOKEN_TYPE.LBRACK);

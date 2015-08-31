@@ -7,14 +7,16 @@ var TOKEN_TYPE = {
   ALTER: '?',
   END: 'EOF',
   EMPTY: 'ε',
+  BLANK: ' ',
   UNKNOWN: 'unknown',
-  LETTER: 'a-z0-9',
+  REGCHAR: 'a-z0-9 ',
 };
 
-function isLetterOrDigit(regChar) {
+function isRegChar(regChar) {
   return (regChar >= 'a' && regChar <= 'z') ||
          (regChar >= 'A' && regChar <= 'Z') ||
-         (regChar >= '0' && regChar <= '9');
+         (regChar >= '0' && regChar <= '9') ||
+         regChar == ' ';
 }
 
 // class Token
@@ -40,9 +42,6 @@ Lexer.prototype.hasNext = function() {
 Lexer.prototype.nextToken = function() {
   while (this.hasNext()) {
     switch (this.regString[this.index]) {
-      case ' ':
-        this._consume();
-        continue;
       case '(':
         this._consume();
         return new Token(TOKEN_TYPE.LBRACK, '(');
@@ -62,8 +61,8 @@ Lexer.prototype.nextToken = function() {
         this._consume();
         return new Token(TOKEN_TYPE.OR, '|');
       default:
-        if (isLetterOrDigit(this.regString[this.index]))
-           return new Token(TOKEN_TYPE.LETTER, this.regString[this.index++]);
+        if (isRegChar(this.regString[this.index]))
+           return new Token(TOKEN_TYPE.REGCHAR, this.regString[this.index++]);
         else
            throw new Error('Unknown type of ' + this.regString[this.index]);
     }

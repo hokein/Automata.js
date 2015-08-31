@@ -1,12 +1,20 @@
 var DOTSCRIPTHEADER = 'digraph finite_state_machine {\n' + '  rankdir = LR;\n';
 var DOTSCRIPTEND = '}\n';
 
+function escapeCharacter(token) {
+  switch (token)  {
+    case ' ':
+      return '[space]';
+  }
+  return token;
+}
+
 exports.toDotScript = function(fsm) {
   var transitionDotScript = '  node [shape = circle];\n';
   for (var from_id in fsm.transitions) {
     for (var to_id in fsm.transitions[from_id]) {
     transitionDotScript += '  ' + [from_id] + '->' + to_id + ' [label="' +
-        fsm.transitions[from_id][to_id]  + '"];\n';
+        escapeCharacter(fsm.transitions[from_id][to_id]) + '"];\n';
     }
   }
   var initialStatesDotScript = '';
