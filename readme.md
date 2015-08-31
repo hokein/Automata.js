@@ -7,6 +7,8 @@ Besides, dot script transition is provided so that you can make diagrams with [G
 
 [Try it online](http://hokein.github.io/Automata.js/)!
 
+![screenshot](screenshot/screenshot.png)
+
 ## Development
 
 ```bash
