@@ -9,7 +9,18 @@ Besides, dot script transition is provided so that you can make diagrams with [G
 
 ## API Description
 
-Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?`, `()`, `|`.
+Currently, Reg2Automata.js supports minimal regular expressions:
+
+* `+`: One or more
+* `*`: Zero
+* `?`: Zero or one
+* `()`: Capture everything enclosed
+* `|`:  Or
+* `\n`: Newline
+* `\r`: Carriage return
+* `\t`: Tab
+* `\w`: [a-zA-Z0-9\_]
+* `\d`: [0-9]
 
 ###FSM
 
@@ -60,7 +71,7 @@ Parses the given regular expression.
 
 Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA).
 
-## Usage 
+## Usage
 
 ###Usage in Node.js
 
