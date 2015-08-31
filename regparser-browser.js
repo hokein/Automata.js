@@ -2,18 +2,33 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 var DOTSCRIPTHEADER = 'digraph finite_state_machine {\n' + '  rankdir = LR;\n';
 var DOTSCRIPTEND = '}\n';
 
+function escapeCharacter(token) {
+  switch (token)  {
+    case ' ':
+      return '[space]';
+    case '\n':
+      return '\\\\n';
+    case '\t':
+      return '\\\\t';
+    case '\r':
+      return '\\\\r';
+    case '\\':
+      return '[\\\\]';
+  }
+  return token;
+}
+
 exports.toDotScript = function(fsm) {
   var transitionDotScript = '  node [shape = circle];\n';
   for (var from_id in fsm.transitions) {
     for (var to_id in fsm.transitions[from_id]) {
     transitionDotScript += '  ' + [from_id] + '->' + to_id + ' [label="' +
-        fsm.transitions[from_id][to_id]  + '"];\n';
+        escapeCharacter(fsm.transitions[from_id][to_id]) + '"];\n';
     }
   }
   var initialStatesDotScript = '';
   var initialStatesStartDotScript = '  node [shape = plaintext];\n';
   var acceptStatesDotScript = '';
-  console.log(fsm);
   for (var i = 0; i < fsm.numOfStates; ++i) {
     if (fsm.acceptStates.indexOf(i.toString()) != -1) {
       acceptStatesDotScript += '  node [shape = doublecircle]; ' + i + ';\n';
@@ -39,14 +54,18 @@ var TOKEN_TYPE = {
   ALTER: '?',
   END: 'EOF',
   EMPTY: 'ε',
+  BLANK: ' ',
+  ESCAPE: '\\',
+  EXTEND: '\d\w',
   UNKNOWN: 'unknown',
-  LETTER: 'a-z0-9',
+  REGCHAR: 'a-z0-9_ \n\t\r',
 };
 
-function isLetterOrDigit(regChar) {
+function isRegChar(regChar) {
   return (regChar >= 'a' && regChar <= 'z') ||
          (regChar >= 'A' && regChar <= 'Z') ||
-         (regChar >= '0' && regChar <= '9');
+         (regChar >= '0' && regChar <= '9') ||
+         regChar == ' ' || regChar == '_';
 }
 
 // class Token
@@ -72,9 +91,31 @@ Lexer.prototype.hasNext = function() {
 Lexer.prototype.nextToken = function() {
   while (this.hasNext()) {
     switch (this.regString[this.index]) {
-      case ' ':
+      case '\\':
         this._consume();
-        continue;
+        if (this.hasNext()) {
+          switch (this.regString[this.index]) {
+            case 'n':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\n');
+            case 't':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\t');
+            case 'r':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\r');
+            case '\\':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\\');
+            case 'd':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\d');
+            case 'w':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\w');
+          }
+        }
+        throw new Error('Expect character after "\\".');
       case '(':
         this._consume();
         return new Token(TOKEN_TYPE.LBRACK, '(');
@@ -94,8 +135,8 @@ Lexer.prototype.nextToken = function() {
         this._consume();
         return new Token(TOKEN_TYPE.OR, '|');
       default:
-        if (isLetterOrDigit(this.regString[this.index]))
-           return new Token(TOKEN_TYPE.LETTER, this.regString[this.index++]);
+        if (isRegChar(this.regString[this.index]))
+           return new Token(TOKEN_TYPE.REGCHAR, this.regString[this.index++]);
         else
            throw new Error('Unknown type of ' + this.regString[this.index]);
     }
@@ -120,8 +161,8 @@ var TOKEN_TYPE = require('./lexer').TOKEN_TYPE;
 function constructGraph(startState) {
   var nfaGraph = {};
   var queue = [];
-  var vis = {};
   queue.push(startState);
+  var vis = {};
   while (queue.length) {
     var state = queue.shift();
     nfaGraph[state.id] = [];
@@ -318,13 +359,15 @@ FSM.prototype.match = function(text) {
   for (var i = 0; i < text.length; ++i) {
     if (!this.transitions[currentState])
       return false;
+    var notFound = true;
     for (var nextState in this.transitions[currentState]) {
       if (this.transitions[currentState][nextState] == text[i]) {
         currentState = nextState;
+        notFound = false;
         break;
       }
-      return false;
     }
+    if (notFound) return false;
   }
   return this.acceptStates.indexOf(currentState) != -1;
 }
@@ -393,7 +436,7 @@ RegParser.prototype._traversalFSM = function() {
 }
 
 RegParser.prototype._reorderNFAStateId = function() {
-  var queue = []; 
+  var queue = [];
   var vis = {};
   queue.push(this.nfa.startState);
   this.id = 0;
@@ -411,17 +454,41 @@ RegParser.prototype._reorderNFAStateId = function() {
   }
 }
 
+function CombineNFAsForOR(subNFA1, subNFA2, parser) {
+  var newNFA = new NFA(new NFAState(parser.id++, false),
+                       new NFAState(parser.id++, true));
+  subNFA1.endState.isAccept = false;
+  subNFA2.endState.isAccept = false;
+
+  newNFA.startState.addStates(EMPTYTOKEN, subNFA1.startState);
+  newNFA.startState.addStates(EMPTYTOKEN, subNFA2.startState);
+  subNFA1.endState.addStates(EMPTYTOKEN, newNFA.endState);
+  subNFA2.endState.addStates(EMPTYTOKEN, newNFA.endState);
+  return newNFA;
+}
+
 RegParser.prototype._expression = function() {
+  var expressionNFA = this._expression_without_or();
+  if (this.lookHead.type == TOKEN_TYPE.OR) {
+    this._match(TOKEN_TYPE.OR);
+    return CombineNFAsForOR(expressionNFA, this._expression(), this);
+  }
+  return expressionNFA;
+}
+
+RegParser.prototype._expression_without_or = function() {
   var factorNFA = this._factor();
-  if (this.lookHead.type == TOKEN_TYPE.LETTER ||
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR ||
+      this.lookHead.type == TOKEN_TYPE.EXTEND ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
-    var subNFA = this._expression();
+    var subNFA = this._expression_without_or();
     factorNFA.endState.isAccept = false;
     factorNFA.endState.id = subNFA.startState.id;
     factorNFA.endState.nextStates = subNFA.startState.nextStates;
     subNFA.startState = null;
+
     return new NFA(factorNFA.startState, subNFA.endState);
-  } 
+  }
   return factorNFA;
 }
 
@@ -446,23 +513,8 @@ RegParser.prototype._factor = function() {
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, termNFA.startState);
-     
-    this._match(TOKEN_TYPE.STAR);
-    return nfa;
-  } else if (this.lookHead.type == TOKEN_TYPE.OR) { // case |
-    this._match(TOKEN_TYPE.OR);
-     
-    var factorNFA = this._factor();
-    var nfa = new NFA(new NFAState(this.id++, false),
-                      new NFAState(this.id++, true));
-    termNFA.endState.isAccept = false;
-    factorNFA.endState.isAccept = false;
 
-    nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
-    nfa.startState.addStates(EMPTYTOKEN, factorNFA.startState);
-    termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-    factorNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-    
+    this._match(TOKEN_TYPE.STAR);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.ALTER) { // case ?
     var nfa = new NFA(new NFAState(this.id++, false),
@@ -472,7 +524,7 @@ RegParser.prototype._factor = function() {
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-     
+
     this._match(TOKEN_TYPE.ALTER);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.Unknown) {
@@ -481,21 +533,56 @@ RegParser.prototype._factor = function() {
   return termNFA;
 }
 
+function constructCharacterNFA(characters, parser) {
+  var nfa = new NFA(new NFAState(parser.id++, false),
+                    new NFAState(parser.id++, true));
+  for (var i = 0; i < characters.length; ++i) {
+    var subNFA = new NFA(new NFAState(parser.id++, false),
+                         new NFAState(parser.id++, false));
+
+    subNFA.startState.addStates(EMPTYTOKEN, subNFA.endState);
+    nfa.startState.addStates({text: characters[i]}, subNFA.startState);
+    subNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
+  }
+  return nfa;
+}
+
+
 RegParser.prototype._term = function() {
-  if (this.lookHead.type == TOKEN_TYPE.LETTER) {
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR) {
     var nfa = new NFA(new NFAState(this.id++, false),
                       new NFAState(this.id++, true));
     nfa.startState.addStates(this.lookHead, nfa.endState);
-    this._match(TOKEN_TYPE.LETTER);
+    this._match(TOKEN_TYPE.REGCHAR);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.LBRACK) {
     this._match(TOKEN_TYPE.LBRACK);
     var nfa = this._expression();
     this._match(TOKEN_TYPE.RBRACK);
     return nfa;
-  } else {
-    throw new Error('Invalid term: ' + this.lookHead.text);
+  } else if (this.lookHead.type == TOKEN_TYPE.EXTEND) {
+    // [0-9]
+    var digitCharArray = Array.apply(null, {length: 10}).map(
+        function (x,i) { return (i) });
+    if (this.lookHead.text == '\d') {
+      var nfa = constructCharacterNFA(digitCharArray, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    } else if (this.lookHead.text == '\w') {
+      // [a-zA-Z0-9_]
+      var allCharacters = (digitCharArray).concat(
+          Array.apply(null, {length: 26}).map(
+              function (x,i) { return String.fromCharCode(97 + i) }));
+      allCharacters = allCharacters.concat(Array.apply(null, {length: 26})
+           .map(function (x,i) { return String.fromCharCode(65 + i) }));
+      allCharacters.push('_');
+
+      var nfa = constructCharacterNFA(allCharacters, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    }
   }
+  throw new Error('Invalid term: ' + this.lookHead.text);
 }
 
 RegParser.prototype._match = function(type) {
