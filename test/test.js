@@ -9,7 +9,15 @@ var testcases = [
   "a*",
   "a+",
   "(a*)|(b+)|(cd)|(e?)",
-  "abc|d|ef|g"
+  "abc|d|ef|g",
+  " abc",
+  "abc\\na",
+  "\\t abc",
+  "\\r ",
+  "\\\\",
+  "__123",
+  "abc\\d+",
+  "\\w+"
 ];
 
 describe('Lexer', function() {
@@ -213,6 +221,66 @@ describe('Parser match Test', function() {
       assert.equal(true, fsm.match('g'));
       assert.equal(false, fsm.match('e'));
       assert.equal(false, fsm.match('abcd'));
+    });
+  });
+  describe('#testcase: ' + testcases[7], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[7]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match(' abc'));
+    });
+  });
+  describe('#testcase: ' + testcases[8], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[8]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('abc\na'));
+    });
+  });
+  describe('#testcase: ' + testcases[9], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[9]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('\t abc'));
+    });
+  });
+  describe('#testcase: ' + testcases[10], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[10]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('\r '));
+    });
+  });
+  describe('#testcase: ' + testcases[11], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[11]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('\\'));
+    });
+  });
+  describe('#testcase: ' + testcases[12], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[12]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('__123'));
+    });
+  });
+  describe('#testcase: ' + testcases[13], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[13]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('abc1'));
+      assert.equal(true, fsm.match('abc123'));
+      assert.equal(false, fsm.match('abcd'));
+    });
+  });
+  describe('#testcase: ' + testcases[14], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[14]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('abc1'));
+      assert.equal(true, fsm.match('abc123'));
+      assert.equal(false, fsm.match('abcd!'));
     });
   });
 });

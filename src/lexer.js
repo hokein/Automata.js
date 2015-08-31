@@ -7,14 +7,18 @@ var TOKEN_TYPE = {
   ALTER: '?',
   END: 'EOF',
   EMPTY: 'ε',
+  BLANK: ' ',
+  ESCAPE: '\\',
+  EXTEND: '\d\w',
   UNKNOWN: 'unknown',
-  LETTER: 'a-z0-9',
+  REGCHAR: 'a-z0-9_ \n\t\r',
 };
 
-function isLetterOrDigit(regChar) {
+function isRegChar(regChar) {
   return (regChar >= 'a' && regChar <= 'z') ||
          (regChar >= 'A' && regChar <= 'Z') ||
-         (regChar >= '0' && regChar <= '9');
+         (regChar >= '0' && regChar <= '9') ||
+         regChar == ' ' || regChar == '_';
 }
 
 // class Token
@@ -40,9 +44,31 @@ Lexer.prototype.hasNext = function() {
 Lexer.prototype.nextToken = function() {
   while (this.hasNext()) {
     switch (this.regString[this.index]) {
-      case ' ':
+      case '\\':
         this._consume();
-        continue;
+        if (this.hasNext()) {
+          switch (this.regString[this.index]) {
+            case 'n':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\n');
+            case 't':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\t');
+            case 'r':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\r');
+            case '\\':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\\');
+            case 'd':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\d');
+            case 'w':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\w');
+          }
+        }
+        throw new Error('Expect character after "\\".');
       case '(':
         this._consume();
         return new Token(TOKEN_TYPE.LBRACK, '(');
@@ -62,8 +88,8 @@ Lexer.prototype.nextToken = function() {
         this._consume();
         return new Token(TOKEN_TYPE.OR, '|');
       default:
-        if (isLetterOrDigit(this.regString[this.index]))
-           return new Token(TOKEN_TYPE.LETTER, this.regString[this.index++]);
+        if (isRegChar(this.regString[this.index]))
+           return new Token(TOKEN_TYPE.REGCHAR, this.regString[this.index++]);
         else
            throw new Error('Unknown type of ' + this.regString[this.index]);
     }

@@ -6,8 +6,8 @@ var TOKEN_TYPE = require('./lexer').TOKEN_TYPE;
 function constructGraph(startState) {
   var nfaGraph = {};
   var queue = [];
-  var vis = {};
   queue.push(startState);
+  var vis = {};
   while (queue.length) {
     var state = queue.shift();
     nfaGraph[state.id] = [];
@@ -281,7 +281,7 @@ RegParser.prototype._traversalFSM = function() {
 }
 
 RegParser.prototype._reorderNFAStateId = function() {
-  var queue = []; 
+  var queue = [];
   var vis = {};
   queue.push(this.nfa.startState);
   this.id = 0;
@@ -323,7 +323,8 @@ RegParser.prototype._expression = function() {
 
 RegParser.prototype._expression_without_or = function() {
   var factorNFA = this._factor();
-  if (this.lookHead.type == TOKEN_TYPE.LETTER ||
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR ||
+      this.lookHead.type == TOKEN_TYPE.EXTEND ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
     var subNFA = this._expression_without_or();
     factorNFA.endState.isAccept = false;
@@ -377,21 +378,56 @@ RegParser.prototype._factor = function() {
   return termNFA;
 }
 
+function constructCharacterNFA(characters, parser) {
+  var nfa = new NFA(new NFAState(parser.id++, false),
+                    new NFAState(parser.id++, true));
+  for (var i = 0; i < characters.length; ++i) {
+    var subNFA = new NFA(new NFAState(parser.id++, false),
+                         new NFAState(parser.id++, false));
+
+    subNFA.startState.addStates(EMPTYTOKEN, subNFA.endState);
+    nfa.startState.addStates({text: characters[i]}, subNFA.startState);
+    subNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
+  }
+  return nfa;
+}
+
+
 RegParser.prototype._term = function() {
-  if (this.lookHead.type == TOKEN_TYPE.LETTER) {
+  if (this.lookHead.type == TOKEN_TYPE.REGCHAR) {
     var nfa = new NFA(new NFAState(this.id++, false),
                       new NFAState(this.id++, true));
     nfa.startState.addStates(this.lookHead, nfa.endState);
-    this._match(TOKEN_TYPE.LETTER);
+    this._match(TOKEN_TYPE.REGCHAR);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.LBRACK) {
     this._match(TOKEN_TYPE.LBRACK);
     var nfa = this._expression();
     this._match(TOKEN_TYPE.RBRACK);
     return nfa;
-  } else {
-    throw new Error('Invalid term: ' + this.lookHead.text);
+  } else if (this.lookHead.type == TOKEN_TYPE.EXTEND) {
+    // [0-9]
+    var digitCharArray = Array.apply(null, {length: 10}).map(
+        function (x,i) { return (i) });
+    if (this.lookHead.text == '\d') {
+      var nfa = constructCharacterNFA(digitCharArray, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    } else if (this.lookHead.text == '\w') {
+      // [a-zA-Z0-9_]
+      var allCharacters = (digitCharArray).concat(
+          Array.apply(null, {length: 26}).map(
+              function (x,i) { return String.fromCharCode(97 + i) }));
+      allCharacters = allCharacters.concat(Array.apply(null, {length: 26})
+           .map(function (x,i) { return String.fromCharCode(65 + i) }));
+      allCharacters.push('_');
+
+      var nfa = constructCharacterNFA(allCharacters, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    }
   }
+  throw new Error('Invalid term: ' + this.lookHead.text);
 }
 
 RegParser.prototype._match = function(type) {
