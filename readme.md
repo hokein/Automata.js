@@ -7,6 +7,19 @@ Besides, dot script transition is provided so that you can make diagrams with [G
 
 [Try it online](http://hokein.github.io/Automata.js/)!
 
+## Development
+
+```bash
+// Install dependency modules.
+npm install
+
+// Run test.
+make test
+
+// Generate browser js.
+make distribution
+```
+
 ## API Description
 
 Currently, Automata.js supports minimal regular expressions:
