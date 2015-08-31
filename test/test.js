@@ -9,6 +9,7 @@ var testcases = [
   "a*",
   "a+",
   "(a*)|(b+)|(cd)|(e?)",
+  "abc|d|ef|g"
 ];
 
 describe('Lexer', function() {
@@ -200,6 +201,18 @@ describe('Parser match Test', function() {
       assert.equal(true, fsm.match('a'));
       assert.equal(true, fsm.match(''));
       assert.equal(false, fsm.match('aaaz'));
+    });
+  });
+  describe('#testcase: ' + testcases[6], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[6]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('abc'));
+      assert.equal(true, fsm.match('d'));
+      assert.equal(true, fsm.match('ef'));
+      assert.equal(true, fsm.match('g'));
+      assert.equal(false, fsm.match('e'));
+      assert.equal(false, fsm.match('abcd'));
     });
   });
 });

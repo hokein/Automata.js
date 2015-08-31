@@ -9,7 +9,7 @@ Besides, dot script transition is provided so that you can make diagrams with [G
 
 ## API Description
 
-Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?`, `()`.
+Currently, Reg2Automata.js supports minimal regular expression with `+`, `*`, `?`, `()`, `|`.
 
 ###FSM
 

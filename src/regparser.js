@@ -204,13 +204,15 @@ FSM.prototype.match = function(text) {
   for (var i = 0; i < text.length; ++i) {
     if (!this.transitions[currentState])
       return false;
+    var notFound = true;
     for (var nextState in this.transitions[currentState]) {
       if (this.transitions[currentState][nextState] == text[i]) {
         currentState = nextState;
+        notFound = false;
         break;
       }
-      return false;
     }
+    if (notFound) return false;
   }
   return this.acceptStates.indexOf(currentState) != -1;
 }
@@ -297,17 +299,40 @@ RegParser.prototype._reorderNFAStateId = function() {
   }
 }
 
+function CombineNFAsForOR(subNFA1, subNFA2, parser) {
+  var newNFA = new NFA(new NFAState(parser.id++, false),
+                       new NFAState(parser.id++, true));
+  subNFA1.endState.isAccept = false;
+  subNFA2.endState.isAccept = false;
+
+  newNFA.startState.addStates(EMPTYTOKEN, subNFA1.startState);
+  newNFA.startState.addStates(EMPTYTOKEN, subNFA2.startState);
+  subNFA1.endState.addStates(EMPTYTOKEN, newNFA.endState);
+  subNFA2.endState.addStates(EMPTYTOKEN, newNFA.endState);
+  return newNFA;
+}
+
 RegParser.prototype._expression = function() {
+  var expressionNFA = this._expression_without_or();
+  if (this.lookHead.type == TOKEN_TYPE.OR) {
+    this._match(TOKEN_TYPE.OR);
+    return CombineNFAsForOR(expressionNFA, this._expression(), this);
+  }
+  return expressionNFA;
+}
+
+RegParser.prototype._expression_without_or = function() {
   var factorNFA = this._factor();
   if (this.lookHead.type == TOKEN_TYPE.LETTER ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
-    var subNFA = this._expression();
+    var subNFA = this._expression_without_or();
     factorNFA.endState.isAccept = false;
     factorNFA.endState.id = subNFA.startState.id;
     factorNFA.endState.nextStates = subNFA.startState.nextStates;
     subNFA.startState = null;
+
     return new NFA(factorNFA.startState, subNFA.endState);
-  } 
+  }
   return factorNFA;
 }
 
@@ -332,23 +357,8 @@ RegParser.prototype._factor = function() {
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, termNFA.startState);
-     
-    this._match(TOKEN_TYPE.STAR);
-    return nfa;
-  } else if (this.lookHead.type == TOKEN_TYPE.OR) { // case |
-    this._match(TOKEN_TYPE.OR);
-     
-    var factorNFA = this._factor();
-    var nfa = new NFA(new NFAState(this.id++, false),
-                      new NFAState(this.id++, true));
-    termNFA.endState.isAccept = false;
-    factorNFA.endState.isAccept = false;
 
-    nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
-    nfa.startState.addStates(EMPTYTOKEN, factorNFA.startState);
-    termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-    factorNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-    
+    this._match(TOKEN_TYPE.STAR);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.ALTER) { // case ?
     var nfa = new NFA(new NFAState(this.id++, false),
@@ -358,7 +368,7 @@ RegParser.prototype._factor = function() {
     nfa.startState.addStates(EMPTYTOKEN, termNFA.startState);
     nfa.startState.addStates(EMPTYTOKEN, nfa.endState);
     termNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
-     
+
     this._match(TOKEN_TYPE.ALTER);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.Unknown) {
