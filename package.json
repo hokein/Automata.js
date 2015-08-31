@@ -1,5 +1,5 @@
 {
-  "name": "reg2automata",
+  "name": "automata",
   "description": "A library convert regular expression to finite state matchine",
   "keywords": ["regular", "automata", "fsm"],
   "version": "0.1.1",
@@ -9,10 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hokein/Reg2Automata.js"
+    "url": "https://github.com/hokein/automata.js"
   },
   "bugs": {
-    "url": "https://github.com/hokein/Reg2Automata.js/issues"
+    "url": "https://github.com/hokein/automata.js/issues"
   },
   "devDependencies": {
     "mocha": "1.21.4",

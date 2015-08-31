@@ -1,15 +1,15 @@
-# Reg2Automata.js
+# Automata.js
 
-Reg2Automata.js is a regular expression converter written in JS for both Node.js and browser.
+Automata.js is a regular expression converter written in JS for both Node.js and browser.
 
 It aims to convert regular expression to finite state machine(FSM, like NFA).
 Besides, dot script transition is provided so that you can make diagrams with [Graphiz][1].
 
-[Try it online](http://hokein.github.io/Reg2Automata.js/)!
+[Try it online](http://hokein.github.io/Automata.js/)!
 
 ## API Description
 
-Currently, Reg2Automata.js supports minimal regular expressions:
+Currently, Automata.js supports minimal regular expressions:
 
 * `+`: One or more
 * `*`: Zero
@@ -76,7 +76,7 @@ Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA
 ###Usage in Node.js
 
 ```
-var regParser = require('reg2automata');
+var regParser = require('automata');
 
 var parser = new regParser.RegParser('a*b');
 var nfa = parser.parseToNFA();
@@ -91,7 +91,7 @@ Reg2Automata uses [node-browserify][2] to generate a browser distribution.
 You can use [Viz.js][3] to render [graphiz dot script][4] in your web page.
 
 ```
-var regParser = require('reg2automata');
+var regParser = require('automata');
 
 var parser = new regParser.RegParser('a*b');
 var nfa = regParser.parseToNFA();
