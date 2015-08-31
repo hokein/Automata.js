@@ -1,5 +1,5 @@
 {
-  "name": "automata",
+  "name": "automata.js",
   "description": "A library convert regular expression to finite state matchine",
   "keywords": ["regular", "automata", "fsm"],
   "version": "0.2.0",

@@ -91,7 +91,7 @@ Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA
 ###Usage in Node.js
 
 ```
-var regParser = require('automata');
+var regParser = require('automata.js');
 
 var parser = new regParser.RegParser('a*b');
 var nfa = parser.parseToNFA();
@@ -106,7 +106,7 @@ Reg2Automata uses [node-browserify][2] to generate a browser distribution.
 You can use [Viz.js][3] to render [graphiz dot script][4] in your web page.
 
 ```
-var regParser = require('automata');
+var regParser = require('automata.js');
 
 var parser = new regParser.RegParser('a*b');
 var nfa = regParser.parseToNFA();
