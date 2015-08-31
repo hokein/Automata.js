@@ -9,7 +9,7 @@ var TOKEN_TYPE = {
   EMPTY: 'ε',
   BLANK: ' ',
   ESCAPE: '\\',
-  EXTEND: '\d',
+  EXTEND: '\d\w',
   UNKNOWN: 'unknown',
   REGCHAR: 'a-z0-9_ \n\t\r',
 };
@@ -63,6 +63,9 @@ Lexer.prototype.nextToken = function() {
             case 'd':
               ++this.index;
               return new Token(TOKEN_TYPE.EXTEND, '\d');
+            case 'w':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\w');
           }
         }
         throw new Error('Expect character after "\\".');

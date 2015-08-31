@@ -378,19 +378,20 @@ RegParser.prototype._factor = function() {
   return termNFA;
 }
 
-function constructDigitNFA(start, end, parser) {
+function constructCharacterNFA(characters, parser) {
   var nfa = new NFA(new NFAState(parser.id++, false),
                     new NFAState(parser.id++, true));
-  for (var i = start; i < end; ++i) {
+  for (var i = 0; i < characters.length; ++i) {
     var subNFA = new NFA(new NFAState(parser.id++, false),
                          new NFAState(parser.id++, false));
 
     subNFA.startState.addStates(EMPTYTOKEN, subNFA.endState);
-    nfa.startState.addStates({text: i.toString()}, subNFA.startState);
+    nfa.startState.addStates({text: characters[i]}, subNFA.startState);
     subNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
   }
   return nfa;
 }
+
 
 RegParser.prototype._term = function() {
   if (this.lookHead.type == TOKEN_TYPE.REGCHAR) {
@@ -405,8 +406,23 @@ RegParser.prototype._term = function() {
     this._match(TOKEN_TYPE.RBRACK);
     return nfa;
   } else if (this.lookHead.type == TOKEN_TYPE.EXTEND) {
+    // [0-9]
+    var digitCharArray = Array.apply(null, {length: 10}).map(
+        function (x,i) { return (i) });
     if (this.lookHead.text == '\d') {
-      var nfa = constructDigitNFA(0, 10, this);
+      var nfa = constructCharacterNFA(digitCharArray, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    } else if (this.lookHead.text == '\w') {
+      // [a-zA-Z0-9_]
+      var allCharacters = (digitCharArray).concat(
+          Array.apply(null, {length: 26}).map(
+              function (x,i) { return String.fromCharCode(97 + i) }));
+      allCharacters = allCharacters.concat(Array.apply(null, {length: 26})
+           .map(function (x,i) { return String.fromCharCode(65 + i) }));
+      allCharacters.push('_');
+
+      var nfa = constructCharacterNFA(allCharacters, this);
       this._match(TOKEN_TYPE.EXTEND);
       return nfa;
     }
