@@ -90,6 +90,8 @@ Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA
 
 ###Usage in Node.js
 
+Install via `npm install automata.js`.
+
 ```
 var regParser = require('automata.js');
 
