@@ -10,14 +10,14 @@ var TOKEN_TYPE = {
   BLANK: ' ',
   ESCAPE: '\\',
   UNKNOWN: 'unknown',
-  REGCHAR: 'a-z0-9 \n\t\r',
+  REGCHAR: 'a-z0-9_ \n\t\r',
 };
 
 function isRegChar(regChar) {
   return (regChar >= 'a' && regChar <= 'z') ||
          (regChar >= 'A' && regChar <= 'Z') ||
          (regChar >= '0' && regChar <= '9') ||
-         regChar == ' ';
+         regChar == ' ' || regChar == '_';
 }
 
 // class Token

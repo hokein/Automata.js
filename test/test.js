@@ -14,7 +14,8 @@ var testcases = [
   "abc\\na",
   "\\t abc",
   "\\r ",
-  "\\\\"
+  "\\\\",
+  "__123"
 ];
 
 describe('Lexer', function() {
@@ -253,6 +254,13 @@ describe('Parser match Test', function() {
       var parser = new regparser.RegParser(testcases[11]);
       var fsm = parser.parseToDFA();
       assert.equal(true, fsm.match('\\'));
+    });
+  });
+  describe('#testcase: ' + testcases[12], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[12]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('__123'));
     });
   });
 });
