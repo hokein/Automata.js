@@ -9,6 +9,7 @@ var TOKEN_TYPE = {
   EMPTY: 'ε',
   BLANK: ' ',
   ESCAPE: '\\',
+  EXTEND: '\d',
   UNKNOWN: 'unknown',
   REGCHAR: 'a-z0-9_ \n\t\r',
 };
@@ -59,6 +60,9 @@ Lexer.prototype.nextToken = function() {
             case '\\':
               ++this.index;
               return new Token(TOKEN_TYPE.REGCHAR, '\\');
+            case 'd':
+              ++this.index;
+              return new Token(TOKEN_TYPE.EXTEND, '\d');
           }
         }
         throw new Error('Expect character after "\\".');

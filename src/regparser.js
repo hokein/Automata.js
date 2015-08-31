@@ -6,8 +6,8 @@ var TOKEN_TYPE = require('./lexer').TOKEN_TYPE;
 function constructGraph(startState) {
   var nfaGraph = {};
   var queue = [];
-  var vis = {};
   queue.push(startState);
+  var vis = {};
   while (queue.length) {
     var state = queue.shift();
     nfaGraph[state.id] = [];
@@ -281,7 +281,7 @@ RegParser.prototype._traversalFSM = function() {
 }
 
 RegParser.prototype._reorderNFAStateId = function() {
-  var queue = []; 
+  var queue = [];
   var vis = {};
   queue.push(this.nfa.startState);
   this.id = 0;
@@ -324,6 +324,7 @@ RegParser.prototype._expression = function() {
 RegParser.prototype._expression_without_or = function() {
   var factorNFA = this._factor();
   if (this.lookHead.type == TOKEN_TYPE.REGCHAR ||
+      this.lookHead.type == TOKEN_TYPE.EXTEND ||
       this.lookHead.type == TOKEN_TYPE.LBRACK) {
     var subNFA = this._expression_without_or();
     factorNFA.endState.isAccept = false;
@@ -377,6 +378,20 @@ RegParser.prototype._factor = function() {
   return termNFA;
 }
 
+function constructDigitNFA(start, end, parser) {
+  var nfa = new NFA(new NFAState(parser.id++, false),
+                    new NFAState(parser.id++, true));
+  for (var i = start; i < end; ++i) {
+    var subNFA = new NFA(new NFAState(parser.id++, false),
+                         new NFAState(parser.id++, false));
+
+    subNFA.startState.addStates(EMPTYTOKEN, subNFA.endState);
+    nfa.startState.addStates({text: i.toString()}, subNFA.startState);
+    subNFA.endState.addStates(EMPTYTOKEN, nfa.endState);
+  }
+  return nfa;
+}
+
 RegParser.prototype._term = function() {
   if (this.lookHead.type == TOKEN_TYPE.REGCHAR) {
     var nfa = new NFA(new NFAState(this.id++, false),
@@ -389,9 +404,14 @@ RegParser.prototype._term = function() {
     var nfa = this._expression();
     this._match(TOKEN_TYPE.RBRACK);
     return nfa;
-  } else {
-    throw new Error('Invalid term: ' + this.lookHead.text);
+  } else if (this.lookHead.type == TOKEN_TYPE.EXTEND) {
+    if (this.lookHead.text == '\d') {
+      var nfa = constructDigitNFA(0, 10, this);
+      this._match(TOKEN_TYPE.EXTEND);
+      return nfa;
+    }
   }
+  throw new Error('Invalid term: ' + this.lookHead.text);
 }
 
 RegParser.prototype._match = function(type) {
