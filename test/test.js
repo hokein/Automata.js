@@ -11,7 +11,8 @@ var testcases = [
   "(a*)|(b+)|(cd)|(e?)",
   "abc|d|ef|g",
   " abc",
-  "abc\\na"
+  "abc\\na",
+  "\\t abc",
 ];
 
 describe('Lexer', function() {
@@ -229,6 +230,13 @@ describe('Parser match Test', function() {
       var parser = new regparser.RegParser(testcases[8]);
       var fsm = parser.parseToDFA();
       assert.equal(true, fsm.match('abc\na'));
+    });
+  });
+  describe('#testcase: ' + testcases[9], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[9]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('\t abc'));
     });
   });
 });

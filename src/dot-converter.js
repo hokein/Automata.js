@@ -7,6 +7,8 @@ function escapeCharacter(token) {
       return '[space]';
     case '\n':
       return '\\\\n';
+    case '\t':
+      return '\\\\t';
   }
   return token;
 }
