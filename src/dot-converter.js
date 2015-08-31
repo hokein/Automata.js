@@ -5,6 +5,8 @@ function escapeCharacter(token) {
   switch (token)  {
     case ' ':
       return '[space]';
+    case '\n':
+      return '\\\\n';
   }
   return token;
 }

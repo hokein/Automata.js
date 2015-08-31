@@ -8,6 +8,8 @@ var TOKEN_TYPE = {
   END: 'EOF',
   EMPTY: 'ε',
   BLANK: ' ',
+  ESCAPE: '\\',
+  ENTER: '\n',
   UNKNOWN: 'unknown',
   REGCHAR: 'a-z0-9 ',
 };
@@ -42,6 +44,16 @@ Lexer.prototype.hasNext = function() {
 Lexer.prototype.nextToken = function() {
   while (this.hasNext()) {
     switch (this.regString[this.index]) {
+      case '\\':
+        this._consume();
+        if (this.hasNext()) {
+          switch (this.regString[this.index]) {
+            case 'n':
+              ++this.index;
+              return new Token(TOKEN_TYPE.REGCHAR, '\n');
+          }
+        }
+        throw new Error('Expect character after "\\".');
       case '(':
         this._consume();
         return new Token(TOKEN_TYPE.LBRACK, '(');
