@@ -103,7 +103,7 @@ console.log(nfa.toDotScript());
 
 ###Usage in Browser
 
-Reg2Automata uses [node-browserify][2] to generate a browser distribution.
+Automata.js uses [node-browserify][2] to generate a browser distribution.
 
 You can use [Viz.js][3] to render [graphiz dot script][4] in your web page.
 
