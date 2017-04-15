@@ -37,7 +37,7 @@ Currently, Automata.js supports minimal regular expressions:
 * `\w`: [a-zA-Z0-9\_]
 * `\d`: [0-9]
 
-###FSM
+### FSM
 
 `FSM` is a object represent a finite state machine(NFA, DFA).
 
@@ -66,21 +66,21 @@ Convert the fsm to Graphiz dot script.
 
 Determine whether `text` matches to the FSM. This methods only supports DFA.
 
-###RegParser
+### RegParser
 
 RegParser is a regular expression parser.
 
-####RegParser.reset(string)
+#### RegParser.reset(string)
 
 Set regular expression `string` in parser.
 
-####RegParser.parseToNFA()
+#### RegParser.parseToNFA()
 
 Parses the given regular expression.
 
 Returns a `FSM` object, the `FSM` represents a Nondeterministic Finite Automata(NFA).
 
-####RegParser.parseToDFA()
+#### RegParser.parseToDFA()
 
 Parses the given regular expression.
 
@@ -88,7 +88,7 @@ Returns a `FSM` object, the `FSM` represents a Deterministic Finite Automata(DFA
 
 ## Usage
 
-###Usage in Node.js
+### Usage in Node.js
 
 Install via `npm install automata.js`.
 
@@ -101,7 +101,7 @@ var nfa = parser.parseToNFA();
 console.log(nfa.toDotScript());
 ```
 
-###Usage in Browser
+### Usage in Browser
 
 Automata.js uses [node-browserify][2] to generate a browser distribution.
 
