@@ -437,13 +437,14 @@ RegParser.prototype._traversalFSM = function() {
 
 RegParser.prototype._reorderNFAStateId = function() {
   var queue = [];
+  var ordered = [];
   var vis = {};
   queue.push(this.nfa.startState);
   this.id = 0;
   vis[this.nfa.startState.id] = 1;
   while (queue.length) {
     var state = queue.shift();
-    state.id = this.id++;
+    ordered.push(state);
     for (var i = 0; i < (state.nextStates).length; ++i) {
       var nextId = state.nextStates[i][1].id;
       if (nextId in vis)
@@ -451,6 +452,10 @@ RegParser.prototype._reorderNFAStateId = function() {
       vis[nextId] = 1;
       queue.push(state.nextStates[i][1]);
     }
+  }
+  while (ordered.length) {
+    var state = ordered.shift();
+    state.id = this.id++;
   }
 }
 
