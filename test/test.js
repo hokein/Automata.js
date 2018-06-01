@@ -17,7 +17,8 @@ var testcases = [
   "\\\\",
   "__123",
   "abc\\d+",
-  "\\w+"
+  "\\w+",
+  "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|0|1|2|3|4|5"
 ];
 
 describe('Lexer', function() {
@@ -281,6 +282,16 @@ describe('Parser match Test', function() {
       assert.equal(true, fsm.match('abc1'));
       assert.equal(true, fsm.match('abc123'));
       assert.equal(false, fsm.match('abcd!'));
+    });
+  });
+  describe('#testcase: ' + testcases[15], function() {
+    it('', function() {
+      var parser = new regparser.RegParser(testcases[15]);
+      var fsm = parser.parseToDFA();
+      assert.equal(true, fsm.match('a'));
+      assert.equal(true, fsm.match('x'));
+      assert.equal(true, fsm.match('t'));
+      assert.equal(true, fsm.match('5'));
     });
   });
 });
