@@ -298,7 +298,7 @@ RegParser.prototype._reorderNFAStateId = function() {
       queue.push(state.nextStates[i][1]);
     }
   }
-  while(ordered.length) {
+  while (ordered.length) {
     var state = ordered.shift();
     state.id = this.id++;
   }
