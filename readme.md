@@ -27,7 +27,7 @@ make distribution
 Currently, Automata.js supports minimal regular expressions:
 
 * `+`: One or more
-* `*`: Zero
+* `*`: Zero or more
 * `?`: Zero or one
 * `()`: Capture everything enclosed
 * `|`:  Or
