@@ -46,7 +46,7 @@ The json definition is below:
 ```
 {
   initialState: 'id',
-  acceptState: ['id', ... ] ,
+  acceptStates: ['id', ... ] ,
   numOfStates: Integer,
   type: 'DFA' or 'NFA',
   transitions: {
